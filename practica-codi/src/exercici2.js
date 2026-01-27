@@ -100,20 +100,57 @@ async function main() {
             console.log(`Codi: ${game.appid}, Nom: ${game.name}`);
         }
 
-        // Iterem per les primeres 10 reviews i analitzem el sentiment
-        console.log('\n=== Anàlisi de Sentiment de Reviews ===');
-        const reviewsToAnalyze = reviews.slice(0, 2);
-        
-        for (const review of reviewsToAnalyze) {
-            console.log(`\nProcessant review: ${review.id}`);
-            const sentiment = await analyzeSentiment(review.content);
-            console.log(`Review ID: ${review.id}`);
-            console.log(`Joc ID: ${review.app_id}`);
-            console.log(`Contingut: ${review.content.substring(0, 100)}...`);
-            console.log(`Sentiment (Ollama): ${sentiment}`);
-            console.log('------------------------');
+        // Processem els dos primers jocs i, per cada joc, les dues primeres reviews
+        console.log('\n=== Anàlisi de Sentiment per Joc (2 jocs x 2 reviews) ===');
+
+        const output = {
+            timestamp: new Date().toISOString(),
+            games: []
+        };
+
+        const gamesToProcess = games.slice(0, 2);
+
+        for (const game of gamesToProcess) {
+            console.log(`\nProcessant joc: ${game.appid} - ${game.name}`);
+
+            // Filtrar reviews que pertanyen a aquest joc (només camps habituals)
+            const gameReviews = reviews.filter(r => {
+                return (r.app_id && r.app_id === game.appid) || (r.appid && r.appid === game.appid) || (r.app_id && r.app_id === String(game.appid));
+            });
+
+            const reviewsForGame = gameReviews.slice(0, 2);
+
+            const statistics = { positive: 0, negative: 0, neutral: 0, error: 0 };
+
+            for (const review of reviewsForGame) {
+                try {
+                    console.log(`Processant review: ${review.id || review.review_id || 'unknown'}`);
+                    const content = review.content || review.review || review.text || '';
+                    const sentiment = await analyzeSentiment(content);
+                    console.log(`Sentiment (Ollama): ${sentiment}`);
+
+                    if (sentiment === 'positive' || sentiment === 'negative' || sentiment === 'neutral') {
+                        statistics[sentiment]++;
+                    } else {
+                        statistics.error++;
+                    }
+                } catch (err) {
+                    console.error('Error processant review:', err.message || err);
+                    statistics.error++;
+                }
+            }
+
+            output.games.push({
+                appid: game.appid,
+                name: game.name,
+                statistics
+            });
         }
-        console.log(`\nNOMÉS AVALUEM LES DUES PRIMERES REVIEWS`);
+
+        // Guardem el resultat en data/exercici2_resposta.json (ruta basada en DATA_PATH)
+        const outputFilePath = path.join(__dirname, dataPath, 'exercici2_resposta.json');
+        fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2), 'utf-8');
+        console.log(`\nResultat desat a: ${outputFilePath}`);
      } catch (error) {
         console.error('Error durant l\'execució:', error.message);
     }

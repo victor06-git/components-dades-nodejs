@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerPrompt, getConversation, listOllamaModels } = require('../controllers/chatController');
+const { registerPrompt, getConversation, listOllamaModels, registerSentimentAnalysis } = require('../controllers/chatController');
 
 /**
  * @swagger
@@ -65,7 +65,7 @@ router.get('/conversation/:id', getConversation);
 /**
  * @swagger
  * /api/chat/models:
- *   get:
+ * get:
  *     summary: Llistar models disponibles a Ollama
  *     tags: [Chat]
  *     responses:
@@ -75,5 +75,29 @@ router.get('/conversation/:id', getConversation);
  *         description: Error al recuperar models
  */
 router.get('/models', listOllamaModels);
+
+/**
+ * @swagger
+ * /api/chat/sentiment-analysis:
+ * post:
+ * summary: Realiza un analisis de sentimiento de un texto
+ * tags: [Chat]
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * text:
+ * type: string
+ * example: "Aquest joc té diferents modes..."
+ * responses:
+ * 201:
+ * description: Análisis creado con éxito
+ * 400:
+ * description: Error en los datos de entrada
+ */
+router.post('/sentiment-analysis', registerSentimentAnalysis);
 
 module.exports = router;

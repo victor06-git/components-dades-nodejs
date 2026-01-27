@@ -1,0 +1,119 @@
+{
+  "analisis": [
+    {
+      "imatge": {
+        "nom_fitxer": "02f4b3be2d.jpg"
+      },
+      "analisi": {
+        "nom_comu": "Antilocapra americana",
+        "nom_cientific": "Antilocapra americana",
+        "taxonomia": {
+          "classe": "Mammalia",
+          "ordre": "Artiodactyla",
+          "familia": "Antilocapridae"
+        },
+        "habitat": {
+          "tipus": [
+            "prat"
+          ],
+          "regioGeografica": [
+            "Estats Units",
+            "Mèxic"
+          ],
+          "clima": [
+            "subhúmids",
+            "húmids"
+          ]
+        },
+        "dieta": {
+          "tipus": "herbívora",
+          "aliments_principals": [
+            "herba",
+            "pastes"
+          ]
+        },
+        "caracteristiques_fisiques": {
+          "mida": {
+            "altura_mitjana_cm": "100-120",
+            "pes_mitja_kg": "40-60"
+          },
+          "colors_predominants": [
+            "oranja",
+            "blanc"
+          ],
+          "trets_distintius": [
+            "orelles llargues",
+            "cua curta",
+            "pèl llarg"
+          ]
+        },
+        "estat_conservacio": {
+          "classificacio_IUCN": "Vulnerable",
+          "amenaces_principals": [
+            "caça",
+            "habitatge destruït",
+            "predadors"
+          ]
+        }
+      }
+    },
+    {
+      "imatge": {
+        "nom_fitxer": "03d7fc0888.jpg"
+      },
+      "analisi": {
+        "nom_comu": "Antílope de Przewalski",
+        "nom_cientific": "Equus przewalskii",
+        "taxonomia": {
+          "classe": "Mammalia",
+          "ordre": "Perissodactyla",
+          "familia": "Equidae"
+        },
+        "habitat": {
+          "tipus": [
+            "prat",
+            "desert"
+          ],
+          "regioGeografica": [
+            "Àsia Central",
+            "Mongòlia"
+          ],
+          "clima": [
+            "desèrtic",
+            "semiàrid"
+          ]
+        },
+        "dieta": {
+          "tipus": "herbívora",
+          "aliments_principals": [
+            "herba",
+            "pastures"
+          ]
+        },
+        "caracteristiques_fisiques": {
+          "mida": {
+            "altura_mitjana_cm": "100-120",
+            "pes_mitja_kg": "40-60"
+          },
+          "colors_predominants": [
+            "marró",
+            "blanc"
+          ],
+          "trets_distintius": [
+            "corns curts",
+            "ulls grans",
+            "pèl llarg"
+          ]
+        },
+        "estat_conservacio": {
+          "classificacio_IUCN": "Vulnerable",
+          "amenaces_principals": [
+            "caça",
+            "perduda d'hàbitat",
+            "competència amb altres espècies"
+          ]
+        }
+      }
+    }
+  ]
+}

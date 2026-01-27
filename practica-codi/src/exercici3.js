@@ -91,6 +91,7 @@ async function main() {
         }
 
         const animalDirectories = await fs.readdir(imagesFolderPath);
+        const results = [];
 
         // Iterem per cada element dins del directori d'animals
         for (const animalDir of animalDirectories) {
@@ -137,28 +138,98 @@ async function main() {
                     console.log(`\nProcessant imatge: ${imagePath}`);
                     console.log(`Mida de la imatge en Base64: ${base64String.length} caràcters`);
                     
-                    // Definim el prompt per a Ollama
-                    const prompt = "Identifica quin tipus d'animal apareix a la imatge";
-                    console.log('Prompt:', prompt);
-                    
-                    // Fem la petició a Ollama amb la imatge i el prompt
-                    const response = await queryOllama(base64String, prompt);
-                    
-                    // Processem la resposta d'Ollama
-                    if (response) {
-                        // Si hem rebut resposta, la mostrem
-                        console.log(`\nResposta d'Ollama per ${imageFile}:`);
-                        console.log(response);
-                    } else {
-                        // Si no hem rebut resposta vàlida, loguegem l'error
-                        console.error(`\nNo s'ha rebut resposta vàlida per ${imageFile}`);
-                    }
+                                        
+                    const structuredPrompt = `Provide a detailed analysis of the animal in the supplied image.
+                                              Respond ONLY with valid JSON (no extra text) following this schema (Catalan keys):
+                                            {
+                                                "nom_comu": "",
+                                                "nom_cientific": "",
+                                                "taxonomia": {
+                                                    "classe": "", 
+                                                    "ordre": "", 
+                                                    "familia": ""
+                                                },
+                                                "habitat": {
+                                                    "tipus": [],
+                                                    "regioGeografica": [],
+                                                    "clima": []
+                                                },
+                                                "dieta": {
+                                                    "tipus": "", 
+                                                    "aliments_principals": []
+                                                },
+                                                "caracteristiques_fisiques": {
+                                                    "mida": {
+                                                        "altura_mitjana_cm": "",
+                                                        "pes_mitja_kg": ""
+                                                    },
+                                                    "colors_predominants": [],
+                                                    "trets_distintius": []
+                                                },
+                                                "estat_conservacio": {
+                                                    "classificacio_IUCN": "",
+                                                    "amenaces_principals": []
+                                                }
+                                            }
+
+                                            Be concise and return only valid JSON that matches the schema.
+                                            If a field is unknown, use an empty string or empty array. 
+                                            Do NOT include any commentary or markdown.`;
+
+                                        console.log('Prompt: (structured JSON request)');
+
+                                        // Fem la petició a Ollama amb la imatge i el prompt estructurat
+                                        const response = await queryOllama(base64String, structuredPrompt);
+
+                                        // Processem la resposta d'Ollama: intentem parsejar JSON
+                                        let analisi = null;
+                                        if (response) {
+                                                console.log(`\nResposta d'Ollama per ${imageFile}:`);
+                                                console.log(response);
+
+                                                // Intentem parsejar la resposta directament
+                                                try {
+                                                        analisi = JSON.parse(response);
+                                                } catch (e) {
+                                                        // Si no és JSON pur, intentem extreure el primer objecte JSON present
+                                                        const firstBrace = response.indexOf('{');
+                                                        const lastBrace = response.lastIndexOf('}');
+                                                        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                                                                const possible = response.slice(firstBrace, lastBrace + 1);
+                                                                try {
+                                                                        analisi = JSON.parse(possible);
+                                                                } catch (e2) {
+                                                                        analisi = { raw_response: response, parse_error: true };
+                                                                }
+                                                        } else {
+                                                                analisi = { raw_response: response, parse_error: true };
+                                                        }
+                                                }
+                                        } else {
+                                                console.error(`\nNo s'ha rebut resposta vàlida per ${imageFile}`);
+                                                analisi = { raw_response: null, parse_error: true };
+                                        }
                     // Separador per millorar la llegibilitat del output
                     console.log('------------------------');
+
+                    // Afegim el resultat a la llista d'anàlisis
+                    results.push({
+                        imatge: { nom_fitxer: imageFile },
+                        analisi
+                    });
                 }
             }
             console.log(`\nATUREM L'EXECUCIÓ DESPRÉS D'ITERAR EL CONTINGUT DEL PRIMER DIRECTORI`);
             break; // ATUREM L'EXECUCIÓ DESPRÉS D'ITERAR EL CONTINGUT DEL PRIMER DIRECTORI
+        }
+
+        // Guardem tots els resultats en un JSON dins del directori `data`
+        try {
+            const outputFilePath = path.join(__dirname, process.env.DATA_PATH, 'exercici3_resposta.json');
+            await fs.writeFile(outputFilePath, JSON.stringify({ analisis: results }, null, 2), 'utf-8');
+            console.log(`\nResultat desat a: ${outputFilePath}`);
+        } catch (writeErr) {
+            console.error('Error desant el fitxer de sortida:', writeErr.message || writeErr);
         }
 
     } catch (error) {

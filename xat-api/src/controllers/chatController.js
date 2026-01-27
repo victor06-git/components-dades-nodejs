@@ -2,6 +2,7 @@
 const axios = require('axios');
 
 const { Conversation, Prompt } = require('../models');
+const SentimentAnalysis = require('../models/SentimentAnalysis');
 const { validateUUID } = require('../middleware/validators');
 const { logger } = require('../config/logger');
 
@@ -385,9 +386,46 @@ const getConversation = async (req, res, next) => {
     }
 };
 
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
+const registerSentimentAnalysis = async(req, res, next) => {
+    try {
+            const { text } = req.body;
+
+            if (!text) {
+                logger.warn('Intent d\'anàlisi de sentiment sense text');
+                return res.status(400).json({ message: 'El text és obligatori per a l\'anàlisi de sentiment' });
+            }
+
+            const sentiment = text.length > 20 ? 'positive' : 'negative';
+            const score = Math.random();
+
+            const result = await SentimentAnalysis.create({
+                text,
+                sentiment,
+                score
+            });
+
+            logger.info(`Anàlisi de sentiment registrat correctament: ID ${result.id}`);
+
+            res.status(201).json(result);
+    }
+    catch (error) {
+        logger.error('Error en l\'anàlisi de sentiment', {
+            error: error.message,
+            stack: error.stack
+        });
+        next(error);
+    }
+}
+
 // Exportació de les funcions públiques
 module.exports = {
     registerPrompt,
     getConversation,
-    listOllamaModels
+    listOllamaModels,
+    registerSentimentAnalysis
 };
